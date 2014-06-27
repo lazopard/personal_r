@@ -4,7 +4,6 @@ import java.util.Arrays;
 public class Test_Sort {
 
     // Note: helper functions embedded for efficiency
-
     private static final int CUTOFF = 90; //insertion sort thereshold
     private static final boolean INSERTIONENABLED = false; //enable insertion sort
 

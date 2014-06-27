@@ -48,151 +48,141 @@ public abstract class Qsort extends RBuiltinNode {
             intQSort(v, 0, n);
             return RDataFactory.createIntVector(v, RDataFactory.COMPLETE_VECTOR);
         }
-
-    /*
-     * //CLRS deterministic partition, Theta(n^2) when v is completely sorted private int
-     *      dPartition(int[] v, int left, int right) { int tmp; //for swapping int x = v[right]; int i =
-     *                 left -1; for(int j = left; j < right - 1; j++) { if (v[j] <= x) { i++; tmp = v[i]; v[i] =
-     *                      v[j]; v[j] = i; } } tmp = v[i + 1]; v[i + 1] = right; v[right] = tmp;
-     *                           
-     *                                return i + 1; }
-     */
-
-    /*
-     *       //CLRS quicksort public void intQSort(int [] v, int left, int right) { if (left < right) {
-     *            int q = dPartition(v, left, right); intQSort(v, left, q -1); intQSort(v, q + 1, right); } }
-     */
-
-    /*
-     *      //helper insertion sort from Bell Lab's Engineering a sort function private static void
-     *            iisort(int [] v, int len) { int i, j, tmp; for(i = 1; i < len; i++) { for(j = i;j > 0 &&
-     *                 v[j-1] > v[j]; j--) { tmp = v[j]; v[j] = v[j - 1]; v[j - 1] = tmp; } } }
-     */
-
-    private static final int CUTOFF = 20;
-
-    //Median of first, last and middle random number between the two.(Peto's remark)
-    private static int iMedian3(int[] v, int l, int r) {
-
-            int m = l + (int) (Math.random() * ((r - l) + 1)); // random number between the two, Peto's
-            // remark
-
-            if (v[l] <= v[m]) {
-                if (v[m] <= v[r])
-                    return m;
-                else {
-                    if (v[l] <= v[r])
-                        return r;
-                    else
-                        return l;
-                }
-            } else {
-                if (v[m] <= v[r]) {
-                    if (v[l] <= v[r])
-                        return l;
-                    else
-                        return r;
-                } else
-                    return m;
-            }
-        }
+    // Note: helper functions embedded for efficiency
+    private static final int CUTOFF = 90; //insertion sort thereshold
+    private static final boolean INSERTIONENABLED = false; //enable insertion sort
 
     // Singleton's Qsort with Peto's remark
-    public void intQSort(int[] v, int left, int right) {
-        int i, j, tmp;// tmp variable for swapping
-        int pivot;
-        if (left + CUTOFF <= right) {
+    public static void intQSort(int v[], int l, int r) {
 
-            pivot = iMedian3(v, left, right);
-            i = left;
-            j = right - 1;
+        int tmp; //tmp variable for swapping
 
-            for (;;) {
-                while (v[++i] < v[pivot])
-                    ;
-                while (v[j--] > v[pivot])
-                    ;
-                if (i < j) {
+        if (INSERTIONENABLED) {
+            //Use insertion sort for arrays smaller than CUTOFF
+            if (r < CUTOFF) {
 
-                    // swap(i, j)
-                    tmp = v[i];
-                    v[i] = v[j];
-                    v[j] = tmp;
-                } else
-                    break;
+                for(int i = l; i < r; i++) {
+                    for(int j = i; j > 0 && v[j - 1] > v[j]; j--) {
+                        // swap(j, j -1) {
+                        tmp=v[j - 1];
+                        v[j - 1]=v[j];
+                        v[j]=tmp;
+                        // }
+                    }
+                }
+
+                return;
             }
         }
-        // Swap(i, right -1)
-        tmp = v[i];
-        v[i] = v[right - 1];
-        v[right - 1] = tmp;
 
-        intQSort(v, left, i - 1);
-        intQSort(v, i + 1, right);
-    }
+        int pivot;
+        int m = l + (int) (Math.random() * ((r - l) + 1)); // random number between first and last, Peto's remark
 
-    private final static double EPSILON = 0.00001;
-
-    // median of three with double array
-    private static int dMedian3(double v[], int l, int r) {
-
-        int m = l + (int) (Math.random() * ((r - l) + 1)); // random number between the two, Peto's
-        // remark
-
+        //median(v[l], v[m], v[r]) {
         if (v[l] <= v[m]) {
             if (v[m] <= v[r])
-                return m;
+                pivot = v[m];
             else {
                 if (v[l] <= v[r])
-                    return r;
+                    pivot = v[r];
                 else
-                    return l;
+                    pivot = v[l];
             }
         } else {
             if (v[m] <= v[r]) {
                 if (v[l] <= v[r])
-                    return l;
+                    pivot = v[l];
                 else
-                    return r;
-            } else
-                return m;
+                    pivot = v[r];
+            } 
+            else
+                pivot = v[m];
         }
-    }
+        // }
 
-    // Singleton qsort with peto remark for doubles.
-    public void dbQSort(double[] v, int left, int right) {
+        int i=l,j=r;
 
-        int i, j, pivot;
-        double tmp; // tmp variable for swapping
+        //Partioning
+        while(i<=j) {
 
-        if (left + CUTOFF <= right) {
+            while(v[i]<pivot) i++;
+            while(v[j]>pivot) j--;
 
-            pivot = dMedian3(v, left, right);
-            i = left;
-            j = right - 1;
+            if(i<=j) {
+                //swap(i, j) {
+                tmp=v[i];
+                v[i]=v[j];
+                v[j]=tmp;
+                // }
 
-            for (;;) {
-                while (v[++i] < v[pivot])
-                    ;
-                while (v[j--] > v[pivot])
-                    ;
-                if (i < j) {
-
-                    // swap(i, j)
-                    tmp = v[i];
-                    v[i] = v[j];
-                    v[j] = tmp;
-                } else
-                    break;
+                i++;
+                j--;
             }
         }
 
-        // Swap(i, right -1)
-        tmp = v[i];
-        v[i] = v[right - 1];
-        v[right - 1] = tmp;
+        if(l<j)       
+            intQSort(v,l,j);
 
-        dbQSort(v, left, i - 1);
-        dbQSort(v, i + 1, right);
+        if(i<r)       
+            intQSort(v,i,r);
     }
+
+    // Singleton qsort with peto remark for doubles.
+    public static void dbQSort(double[] v, int l, int r) {
+
+        double pivot;
+        int m = l + (int) (Math.random() * ((r - l) + 1)); // random number between first and last, Peto's remark
+
+        //median(v[l], v[m], v[r]) {
+        if (v[l] <= v[m]) {
+            if (v[m] <= v[r])
+                pivot = v[m];
+            else {
+                if (v[l] <= v[r])
+                    pivot = v[r];
+                else
+                    pivot = v[l];
+            }
+        } else {
+            if (v[m] <= v[r]) {
+                if (v[l] <= v[r])
+                    pivot = v[l];
+                else
+                    pivot = v[r];
+            } 
+            else
+                pivot = v[m];
+        }
+        // }
+
+        int i=l,j=r;
+        double tmp; //tmp variable for swapping
+
+        //Partioning
+        while(i<=j) {
+
+            while(v[i]<pivot) i++;
+            while(v[j]>pivot) j--;
+
+            if(i<=j) {
+                //swap(i, j) {
+                tmp=v[i];
+                v[i]=v[j];
+                v[j]=tmp;
+                // }
+
+                i++;
+                j--;
+            }
+        }
+
+        if(l<j)       
+            dbQSort(v,l,j);
+
+        if(i<r)       
+            dbQSort(v,i,r);
+
+    }
+
 }
+
