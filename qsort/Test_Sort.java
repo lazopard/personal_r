@@ -1,9 +1,12 @@
 import java.util.Arrays;
 
+
 public class Test_Sort {
 
-    private static final int CUTOFF = 90;
-    private static final boolean INSERTIONENABLED = false;
+    // Note: helper functions embedded for efficiency
+
+    private static final int CUTOFF = 90; //insertion sort thereshold
+    private static final boolean INSERTIONENABLED = false; //enable insertion sort
 
     // Singleton's Qsort with Peto's remark
     public static void intQSort(int v[], int l, int r) {
@@ -16,9 +19,11 @@ public class Test_Sort {
 
                 for(int i = l; i < r; i++) {
                     for(int j = i; j > 0 && v[j - 1] > v[j]; j--) {
+                        // swap(j, j -1) {
                         tmp=v[j - 1];
                         v[j - 1]=v[j];
                         v[j]=tmp;
+                        // }
                     }
                 }
 
@@ -29,7 +34,7 @@ public class Test_Sort {
         int pivot;
         int m = l + (int) (Math.random() * ((r - l) + 1)); // random number between first and last, Peto's remark
 
-        //median(v[l], v[m], v[r])
+        //median(v[l], v[m], v[r]) {
         if (v[l] <= v[m]) {
             if (v[m] <= v[r])
                 pivot = v[m];
@@ -49,6 +54,7 @@ public class Test_Sort {
             else
                 pivot = v[m];
         }
+        // }
 
         int i=l,j=r;
 
@@ -59,10 +65,11 @@ public class Test_Sort {
             while(v[j]>pivot) j--;
 
             if(i<=j) {
-                //swap(i, j)
+                //swap(i, j) {
                 tmp=v[i];
                 v[i]=v[j];
                 v[j]=tmp;
+                // }
 
                 i++;
                 j--;
@@ -82,7 +89,7 @@ public class Test_Sort {
         double pivot;
         int m = l + (int) (Math.random() * ((r - l) + 1)); // random number between first and last, Peto's remark
     
-        //median(v[l], v[m], v[r])
+        //median(v[l], v[m], v[r]) {
         if (v[l] <= v[m]) {
             if (v[m] <= v[r])
                 pivot = v[m];
@@ -102,6 +109,7 @@ public class Test_Sort {
             else
                 pivot = v[m];
         }
+        // }
 
         int i=l,j=r;
         double tmp; //tmp variable for swapping
@@ -113,10 +121,12 @@ public class Test_Sort {
             while(v[j]>pivot) j--;
 
             if(i<=j) {
-                //swap(i, j)
+                //swap(i, j) {
                 tmp=v[i];
                 v[i]=v[j];
                 v[j]=tmp;
+                // }
+
                 i++;
                 j--;
             }
@@ -179,3 +189,4 @@ public class Test_Sort {
         System.out.println("Is double array sorted: ?" + dIsSorted(d));
     }
 }
+
