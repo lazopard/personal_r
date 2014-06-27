@@ -2,10 +2,29 @@ import java.util.Arrays;
 
 public class Test_Sort {
 
-    private static final int CUTOFF = 0;
+    private static final int CUTOFF = 90;
+    private static final boolean INSERTIONENABLED = false;
 
     // Singleton's Qsort with Peto's remark
     public static void intQSort(int v[], int l, int r) {
+
+        int tmp; //tmp variable for swapping
+
+        if (INSERTIONENABLED) {
+            //Use insertion sort for arrays smaller than CUTOFF
+            if (r < CUTOFF) {
+
+                for(int i = l; i < r; i++) {
+                    for(int j = i; j > 0 && v[j - 1] > v[j]; j--) {
+                        tmp=v[j - 1];
+                        v[j - 1]=v[j];
+                        v[j]=tmp;
+                    }
+                }
+
+                return;
+            }
+        }
 
         int pivot;
         int m = l + (int) (Math.random() * ((r - l) + 1)); // random number between first and last, Peto's remark
@@ -32,7 +51,6 @@ public class Test_Sort {
         }
 
         int i=l,j=r;
-        int tmp; //tmp variable for swapping
 
         //Partioning
         while(i<=j) {
@@ -45,6 +63,7 @@ public class Test_Sort {
                 tmp=v[i];
                 v[i]=v[j];
                 v[j]=tmp;
+
                 i++;
                 j--;
             }
@@ -57,20 +76,13 @@ public class Test_Sort {
             intQSort(v,i,r);
     }
 
-    private final static double EPSILON = 0.00001;
-
     // Singleton qsort with peto remark for doubles.
     public static void dbQSort(double[] v, int l, int r) {
 
         double pivot;
         int m = l + (int) (Math.random() * ((r - l) + 1)); // random number between first and last, Peto's remark
-
+    
         //median(v[l], v[m], v[r])
-
-        //float diffLM = ((v[l] - v[m]) <= 0.0F) ? 0.0F - (v[l] - v[m]) : (v[l] - v[m]);
-        //float diffMR = ((v[m] - v[r]) <= 0.0F) ? 0.0F - (v[m] - v[r]) : (v[m] - v[r]);
-        //float diffLR = ((v[l] - v[r]) <= 0.0F) ? 0.0F - (v[l] - v[r]) : (v[l] - v[r]);
-
         if (v[l] <= v[m]) {
             if (v[m] <= v[r])
                 pivot = v[m];
@@ -118,6 +130,7 @@ public class Test_Sort {
 
     }
 
+    //checks if int array is sorted
     public static boolean isSorted(int[] a) {
         for(int i = 0; i < a.length-1; i ++) { 
             if (a[i] > a[i+1]) {
@@ -127,10 +140,10 @@ public class Test_Sort {
         return true;
     }
 
+    //checks if double array is sorted
     public static boolean dIsSorted(double [] a) {
 
         for(int i = 0; i < a.length-1; i ++) { 
-            System.out.println(a[i]);
             if (a[i] >= a[i+1]) {
                 return false; 
             }
@@ -138,30 +151,31 @@ public class Test_Sort {
         return true;
     }
 
+    //Testing both sorting functions 
     public static void main(String [] args) {
         int n = 10000000;
         int [] i = new int[n];
         double [] d = new double[n];
+
         for(int j = 0; j < n; j++) {
-            //i[j] = 0 + (int) (Math.random()*((n - 0)+ 1 ));
-            //d[j] = 0 + Math.random()*((n - 0)+ 1 );
+            i[j] = 0 + (int) (Math.random()*((n - 0)+ 1 ));
             d[j] = Math.random();
         }
 
-        //long iSortTimeStart = System.nanoTime();
-        //intQSort(i, 0, n - 1);
-        //long iSortTimeEnd = System.nanoTime();
-        //long iSortDuration = iSortTimeEnd - iSortTimeStart;
+        long iSortTimeStart = System.nanoTime();
+        intQSort(i, 0, n - 1);
+        long iSortTimeEnd = System.nanoTime();
+        long iSortDuration = iSortTimeEnd - iSortTimeStart;
 
         long dSortTimeStart = System.nanoTime();
         dbQSort(d, 0, n - 1);
         long dSortTimeEnd = System.nanoTime();
         long dSortDuration = dSortTimeEnd - dSortTimeStart;
 
-        //System.out.println("iQsort time: " + iSortDuration + "\n");
+        System.out.println("iQsort time: " + iSortDuration + "\n");
         System.out.println("dbQSort time: " + dSortDuration + "\n");
 
-        //System.out.println("Is int array sorted: ?" + isSorted(i));
+        System.out.println("Is int array sorted: ?" + isSorted(i));
         System.out.println("Is double array sorted: ?" + dIsSorted(d));
     }
 }
