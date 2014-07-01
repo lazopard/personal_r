@@ -11,33 +11,20 @@ import com.oracle.truffle.r.runtime.ops.*;
 @RBuiltin(name = "qsort", kind = Internal)
 public abstract class Qsort extends RBuiltinNode {
 
-    @Child static CastDoubleNode castDoubleNode;
-
-    @Child protected BooleanOperation eq = BinaryCompare.EQUAL.create();
-    @Child protected BooleanOperation lt = BinaryCompare.LESS_THAN.create();
-    @Child protected BooleanOperation le = BinaryCompare.LESS_EQUAL.create();
-    @Child protected BooleanOperation ge = BinaryCompare.GREATER_EQUAL.create();
-    @Child protected BooleanOperation gt = BinaryCompare.GREATER_THAN.create();
-
-    private static final Object[] PARAMETER_NAMES = new Object[]{"x", "ind"};
-
-    @Override
-    public Object[] getParameterNames() {
-        return PARAMETER_NAMES;
-    }
+    private static final Object[] PARAMETER_NAMES = new Object[]{"x"};
 
     @Override
     public RNode[] getParameterValues() {
-        return new RNode[]{ConstantNode.create(RMissing.instance), ConstantNode.create(RMissing.instance)};
+        return new RNode[]{ConstantNode.create(RMissing.instance)};
     }
 
     @Specialization(order = 10)
-        public RDoubleVector do_psort(RDoubleVector x) {
+        public RDoubleVector do_qsort(RDoubleVector x) {
             controlVisibility();
             System.out.println("entering do_psort");
             double[] v = x.getDataCopy();
             int n = x.getLength();
-            dbQSort(v, 0, n);
+            dbQSort(v, 0, n - 1);
             return RDataFactory.createDoubleVector(v, RDataFactory.COMPLETE_VECTOR);
         }
 
@@ -45,9 +32,10 @@ public abstract class Qsort extends RBuiltinNode {
         public RIntVector do_qsort(RIntVector x) {
             int[] v = x.getDataCopy();
             int n = x.getLength();
-            intQSort(v, 0, n);
+            intQSort(v, 0, n - 1);
             return RDataFactory.createIntVector(v, RDataFactory.COMPLETE_VECTOR);
         }
+
     // Note: helper functions embedded for efficiency
     private static final int CUTOFF = 90; //insertion sort thereshold
     private static final boolean INSERTIONENABLED = false; //enable insertion sort
@@ -183,6 +171,5 @@ public abstract class Qsort extends RBuiltinNode {
             dbQSort(v,i,r);
 
     }
-
 }
 

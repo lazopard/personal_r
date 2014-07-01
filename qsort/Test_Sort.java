@@ -1,6 +1,5 @@
 import java.util.Arrays;
 
-
 public class Test_Sort {
 
     // Note: helper functions embedded for efficiency
@@ -13,6 +12,7 @@ public class Test_Sort {
         int tmp; //tmp variable for swapping
 
         if (INSERTIONENABLED) {
+
             //Use insertion sort for arrays smaller than CUTOFF
             if (r < CUTOFF) {
 
