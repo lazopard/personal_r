@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2013, 2014, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
+ */
 package com.oracle.truffle.r.nodes.builtin.base;
 
 import static com.oracle.truffle.r.runtime.RBuiltinKind.*;
@@ -8,7 +30,6 @@ import com.oracle.truffle.api.dsl.*;
 import com.oracle.truffle.r.nodes.builtin.*;
 import com.oracle.truffle.r.runtime.*;
 import com.oracle.truffle.r.runtime.data.*;
-import com.oracle.truffle.r.runtime.ops.*;
 import com.oracle.truffle.r.runtime.ops.na.*;
 
 @RBuiltin(name = "cummin", kind = PRIMITIVE)
@@ -16,7 +37,12 @@ public abstract class CumMin extends RBuiltinNode {
 
     private final NACheck na = NACheck.create();
 
-    @Child private BooleanOperation lt = BinaryCompare.LESS_THAN.create();
+    private static boolean complex_lt(RComplex a, RComplex b) {
+        if (a.getRealPart() <= b.getRealPart()) {
+            return (a.getImaginaryPart() < b.getImaginaryPart());
+        }
+        return false;
+    }
 
     @Specialization
     public double cummin(double arg) {
@@ -142,25 +168,23 @@ public abstract class CumMin extends RBuiltinNode {
     @Specialization
     public RComplexVector cummin(RComplexVector v) {
         controlVisibility();
-        double[] cmin_v = new double[v.getLength() * 2];
-        RComplex min = RDataFactory.createComplex(v.getDataAt(0).getRealPart(), v.getDataAt(0).getImaginaryPart());
-
-        int i;
-        na.enable(true);
-        for (i = 0; i < v.getLength(); ++i) {
-            RComplex value = RDataFactory.createComplex(v.getDataAt(i).getRealPart(), v.getDataAt(i).getImaginaryPart());
-            if (na.check(v.getDataAt(i))) {
-                break;
-            }
-            if (lt.op(value, min) != 0)
-                min = value;
-            cmin_v[2 * i] = min.getRealPart();
-            cmin_v[2 * i + 1] = min.getImaginaryPart();
-        }
-        if (!na.neverSeenNA()) {
-            Arrays.fill(cmin_v, 2 * i, cmin_v.length, RRuntime.DOUBLE_NA);
-        }
-        return RDataFactory.createComplexVector(cmin_v, na.neverSeenNA(), v.getNames());
+        String notDefinedError = "in cummin(%s) : 'cummax' not define for complex numbers";
+        String.format(notDefinedError, v.toString());
+        RError.error(null, notDefinedError);
+        return null;
+        /*
+         * double[] cmin_v = new double[v.getLength() * 2]; RComplex min =
+         * RDataFactory.createComplex(v.getDataAt(0).getRealPart(),
+         * v.getDataAt(0).getImaginaryPart());
+         * 
+         * int i; na.enable(true); for (i = 0; i < v.getLength(); ++i) { RComplex value =
+         * RDataFactory.createComplex(v.getDataAt(i).getRealPart(),
+         * v.getDataAt(i).getImaginaryPart()); if (na.check(v.getDataAt(i))) { break; } if
+         * (complex_lt(value, min)) min = value; cmin_v[2 * i] = min.getRealPart(); cmin_v[2 * i +
+         * 1] = min.getImaginaryPart(); } if (!na.neverSeenNA()) { Arrays.fill(cmin_v, 2 * i,
+         * cmin_v.length, RRuntime.DOUBLE_NA); } return RDataFactory.createComplexVector(cmin_v,
+         * na.neverSeenNA(), v.getNames());
+         */
     }
 
 }
