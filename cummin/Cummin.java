@@ -37,13 +37,6 @@ public abstract class CumMin extends RBuiltinNode {
 
     private final NACheck na = NACheck.create();
 
-    private static boolean complex_lt(RComplex a, RComplex b) {
-        if (a.getRealPart() <= b.getRealPart()) {
-            return (a.getImaginaryPart() < b.getImaginaryPart());
-        }
-        return false;
-    }
-
     @Specialization
     public double cummin(double arg) {
         controlVisibility();
@@ -67,124 +60,124 @@ public abstract class CumMin extends RBuiltinNode {
     }
 
     @Specialization
-    public RIntVector cummin(RIntSequence arg) {
-        return null;
+    public RIntVector cumMin(RIntSequence v) {
+        controlVisibility();
+        int[] cminV = new int[v.getLength()];
+
+        if (v.getStride() > 0) { // all numbers are bigger than the first one
+            Arrays.fill(cminV, v.getStart());
+            return RDataFactory.createIntVector(cminV, RDataFactory.COMPLETE_VECTOR, v.getNames());
+        } else {
+            cminV[0] = v.getStart();
+            for (int i = 1; i < v.getLength(); i++) {
+                cminV[i] = cminV[i - 1] + v.getStride();
+            }
+            return RDataFactory.createIntVector(cminV, RDataFactory.COMPLETE_VECTOR, v.getNames());
+        }
     }
 
     @Specialization
     public RDoubleVector cummin(RDoubleVector v) {
         controlVisibility();
-        double[] cmin_v = new double[v.getLength()];
+        double[] cminV = new double[v.getLength()];
         double min = v.getDataAt(0);
-        cmin_v[0] = min;
+        cminV[0] = min;
         na.enable(v);
 
         int i;
         for (i = 1; i < v.getLength(); ++i) {
-            if (v.getDataAt(i) < min)
+            if (v.getDataAt(i) < min) {
                 min = v.getDataAt(i);
+            }
             if (na.check(v.getDataAt(i))) {
                 break;
             }
-            cmin_v[i] = min;
+            cminV[i] = min;
         }
         if (!na.neverSeenNA()) {
-            Arrays.fill(cmin_v, i, cmin_v.length, RRuntime.DOUBLE_NA);
+            Arrays.fill(cminV, i, cminV.length, RRuntime.DOUBLE_NA);
         }
-        return RDataFactory.createDoubleVector(cmin_v, na.neverSeenNA(), v.getNames());
+        return RDataFactory.createDoubleVector(cminV, na.neverSeenNA(), v.getNames());
     }
 
     @Specialization
     public RIntVector cummin(RIntVector v) {
         controlVisibility();
-        int[] cmin_v = new int[v.getLength()];
+        int[] cminV = new int[v.getLength()];
         int min = v.getDataAt(0);
-        cmin_v[0] = min;
+        cminV[0] = min;
         na.enable(v);
 
         int i;
         for (i = 1; i < v.getLength(); ++i) {
-            if (v.getDataAt(i) < min)
+            if (v.getDataAt(i) < min) {
                 min = v.getDataAt(i);
+            }
             if (na.check(v.getDataAt(i))) {
                 break;
             }
-            cmin_v[i] = min;
+            cminV[i] = min;
         }
         if (!na.neverSeenNA()) {
-            Arrays.fill(cmin_v, i, cmin_v.length, RRuntime.INT_NA);
+            Arrays.fill(cminV, i, cminV.length, RRuntime.INT_NA);
         }
-        return RDataFactory.createIntVector(cmin_v, na.neverSeenNA(), v.getNames());
+        return RDataFactory.createIntVector(cminV, na.neverSeenNA(), v.getNames());
     }
 
     @Specialization
     public RIntVector cummin(RLogicalVector v) {
         controlVisibility();
-        int[] cmin_v = new int[v.getLength()];
+        int[] cminV = new int[v.getLength()];
         int min = v.getDataAt(0);
-        cmin_v[0] = min;
+        cminV[0] = min;
         na.enable(v);
 
         int i;
         for (i = 1; i < v.getLength(); ++i) {
-            if (v.getDataAt(i) < min)
+            if (v.getDataAt(i) < min) {
                 min = v.getDataAt(i);
+            }
             if (na.check(v.getDataAt(i))) {
                 break;
             }
-            cmin_v[i] = min;
+            cminV[i] = min;
         }
         if (!na.neverSeenNA()) {
-            Arrays.fill(cmin_v, i, cmin_v.length, RRuntime.INT_NA);
+            Arrays.fill(cminV, i, cminV.length, RRuntime.INT_NA);
         }
-        return RDataFactory.createIntVector(cmin_v, na.neverSeenNA(), v.getNames());
+        return RDataFactory.createIntVector(cminV, na.neverSeenNA(), v.getNames());
     }
 
     @Specialization
     public RDoubleVector cummin(RStringVector v) {
 
         controlVisibility();
-        double[] cmin_v = new double[v.getLength()];
+        double[] cminV = new double[v.getLength()];
         double min = na.convertStringToDouble(v.getDataAt(0));
-        cmin_v[0] = min;
+        cminV[0] = min;
         na.enable(v);
 
         int i;
         for (i = 1; i < v.getLength(); ++i) {
             double value = na.convertStringToDouble(v.getDataAt(i));
-            if (value < min)
+            if (value < min) {
                 min = value;
+            }
             if (na.check(v.getDataAt(i))) {
                 break;
             }
-            cmin_v[i] = min;
+            cminV[i] = min;
         }
         if (!na.neverSeenNA()) {
-            Arrays.fill(cmin_v, i, cmin_v.length, RRuntime.DOUBLE_NA);
+            Arrays.fill(cminV, i, cminV.length, RRuntime.DOUBLE_NA);
         }
-        return RDataFactory.createDoubleVector(cmin_v, na.neverSeenNA(), v.getNames());
+        return RDataFactory.createDoubleVector(cminV, na.neverSeenNA(), v.getNames());
     }
 
     @Specialization
     public RComplexVector cummin(RComplexVector v) {
         controlVisibility();
-        String notDefinedError = "in cummin(%s) : 'cummax' not define for complex numbers";
-        String.format(notDefinedError, v.toString());
-        RError.error(null, notDefinedError);
-        return null;
-        /*
-         * double[] cmin_v = new double[v.getLength() * 2]; RComplex min =
-         * RDataFactory.createComplex(v.getDataAt(0).getRealPart(),
-         * v.getDataAt(0).getImaginaryPart());
-         * 
-         * int i; na.enable(true); for (i = 0; i < v.getLength(); ++i) { RComplex value =
-         * RDataFactory.createComplex(v.getDataAt(i).getRealPart(),
-         * v.getDataAt(i).getImaginaryPart()); if (na.check(v.getDataAt(i))) { break; } if
-         * (complex_lt(value, min)) min = value; cmin_v[2 * i] = min.getRealPart(); cmin_v[2 * i +
-         * 1] = min.getImaginaryPart(); } if (!na.neverSeenNA()) { Arrays.fill(cmin_v, 2 * i,
-         * cmin_v.length, RRuntime.DOUBLE_NA); } return RDataFactory.createComplexVector(cmin_v,
-         * na.neverSeenNA(), v.getNames());
-         */
+        throw RError.error(getEncapsulatingSourceSection(), RError.Message.CUMMIN_UNDEFINED_FOR_COMPLEX);
     }
 
 }

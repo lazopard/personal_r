@@ -37,13 +37,6 @@ public abstract class CumMax extends RBuiltinNode {
 
     private final NACheck na = NACheck.create();
 
-    private static boolean complex_gt(RComplex a, RComplex b) {
-        if (a.getRealPart() >= b.getRealPart()) {
-            return (a.getImaginaryPart() > b.getImaginaryPart());
-        }
-        return false;
-    }
-
     @Specialization
     public double cummax(double arg) {
         controlVisibility();
@@ -70,141 +63,122 @@ public abstract class CumMax extends RBuiltinNode {
     public RIntVector cummax(RIntSequence v) {
 
         controlVisibility();
-        int[] cmax_v = new int[v.getLength()];
-        int current = v.getStart();
-        int max = 0;
-        int i;
-        na.enable(true);
-        for (i = 0; i < v.getLength(); ++i) {
+        int[] cmaxV = new int[v.getLength()];
 
-            if (current > max)
-                max = current;
-            if (na.check(max)) {
-                break;
+        if (v.getStride() < 0) { // all numbers are bigger than the first one
+            Arrays.fill(cmaxV, v.getStart());
+            return RDataFactory.createIntVector(cmaxV, RDataFactory.COMPLETE_VECTOR, v.getNames());
+        } else {
+            cmaxV[0] = v.getStart();
+            for (int i = 1; i < v.getLength(); i++) {
+                cmaxV[i] = cmaxV[i - 1] + v.getStride();
             }
-            current = v.getStride();
-            cmax_v[i] = max;
+            return RDataFactory.createIntVector(cmaxV, RDataFactory.COMPLETE_VECTOR, v.getNames());
         }
-        if (!na.neverSeenNA()) {
-            Arrays.fill(cmax_v, i, cmax_v.length, RRuntime.INT_NA);
-        }
-        return RDataFactory.createIntVector(cmax_v, RDataFactory.COMPLETE_VECTOR, v.getNames());
     }
 
     @Specialization
     public RDoubleVector cummax(RDoubleVector v) {
         controlVisibility();
-        double[] cmax_v = new double[v.getLength()];
+        double[] cmaxV = new double[v.getLength()];
         double max = v.getDataAt(0);
-        cmax_v[0] = max;
+        cmaxV[0] = max;
         na.enable(v);
 
         int i;
         for (i = 1; i < v.getLength(); ++i) {
-            if (v.getDataAt(i) > max)
+            if (v.getDataAt(i) > max) {
                 max = v.getDataAt(i);
+            }
             if (na.check(v.getDataAt(i))) {
                 break;
             }
-            cmax_v[i] = max;
+            cmaxV[i] = max;
         }
         if (!na.neverSeenNA()) {
-            Arrays.fill(cmax_v, i, cmax_v.length, RRuntime.DOUBLE_NA);
+            Arrays.fill(cmaxV, i, cmaxV.length, RRuntime.DOUBLE_NA);
         }
-        return RDataFactory.createDoubleVector(cmax_v, na.neverSeenNA(), v.getNames());
+        return RDataFactory.createDoubleVector(cmaxV, na.neverSeenNA(), v.getNames());
     }
 
     @Specialization
     public RIntVector cummax(RIntVector v) {
         controlVisibility();
-        int[] cmax_v = new int[v.getLength()];
+        int[] cmaxV = new int[v.getLength()];
         int max = v.getDataAt(0);
-        cmax_v[0] = max;
+        cmaxV[0] = max;
         na.enable(v);
 
         int i;
         for (i = 1; i < v.getLength(); ++i) {
-            if (v.getDataAt(i) > max)
+            if (v.getDataAt(i) > max) {
                 max = v.getDataAt(i);
+            }
             if (na.check(v.getDataAt(i))) {
                 break;
             }
-            cmax_v[i] = max;
+            cmaxV[i] = max;
         }
         if (!na.neverSeenNA()) {
-            Arrays.fill(cmax_v, i, cmax_v.length, RRuntime.INT_NA);
+            Arrays.fill(cmaxV, i, cmaxV.length, RRuntime.INT_NA);
         }
-        return RDataFactory.createIntVector(cmax_v, na.neverSeenNA(), v.getNames());
+        return RDataFactory.createIntVector(cmaxV, na.neverSeenNA(), v.getNames());
     }
 
     @Specialization
     public RIntVector cummax(RLogicalVector v) {
         controlVisibility();
-        int[] cmax_v = new int[v.getLength()];
+        int[] cmaxV = new int[v.getLength()];
         int max = v.getDataAt(0);
-        cmax_v[0] = max;
+        cmaxV[0] = max;
         na.enable(v);
 
         int i;
         for (i = 1; i < v.getLength(); ++i) {
-            if (v.getDataAt(i) > max)
+            if (v.getDataAt(i) > max) {
                 max = v.getDataAt(i);
+            }
             if (na.check(v.getDataAt(i))) {
                 break;
             }
-            cmax_v[i] = max;
+            cmaxV[i] = max;
         }
         if (!na.neverSeenNA()) {
-            Arrays.fill(cmax_v, i, cmax_v.length, RRuntime.INT_NA);
+            Arrays.fill(cmaxV, i, cmaxV.length, RRuntime.INT_NA);
         }
-        return RDataFactory.createIntVector(cmax_v, na.neverSeenNA(), v.getNames());
+        return RDataFactory.createIntVector(cmaxV, na.neverSeenNA(), v.getNames());
     }
 
     @Specialization
     public RDoubleVector cummax(RStringVector v) {
 
         controlVisibility();
-        double[] cmax_v = new double[v.getLength()];
+        double[] cmaxV = new double[v.getLength()];
         double max = na.convertStringToDouble(v.getDataAt(0));
-        cmax_v[0] = max;
+        cmaxV[0] = max;
         na.enable(v);
 
         int i;
         for (i = 1; i < v.getLength(); ++i) {
             double value = na.convertStringToDouble(v.getDataAt(i));
-            if (value > max)
+            if (value > max) {
                 max = value;
+            }
             if (na.check(v.getDataAt(i))) {
                 break;
             }
-            cmax_v[i] = max;
+            cmaxV[i] = max;
         }
         if (!na.neverSeenNA()) {
-            Arrays.fill(cmax_v, i, cmax_v.length, RRuntime.DOUBLE_NA);
+            Arrays.fill(cmaxV, i, cmaxV.length, RRuntime.DOUBLE_NA);
         }
-        return RDataFactory.createDoubleVector(cmax_v, na.neverSeenNA(), v.getNames());
+        return RDataFactory.createDoubleVector(cmaxV, na.neverSeenNA(), v.getNames());
     }
 
     @Specialization
     public RComplexVector cummax(RComplexVector v) {
         controlVisibility();
-        String notDefinedError = "in cummax(%s) : 'cummin' not define for complex numbers";
-        String.format(notDefinedError, v.toString());
-        RError.error(null, notDefinedError);
-        return null;
-        /*
-         * double[] cmax_v = new double[v.getLength() * 2]; RComplex max =
-         * RDataFactory.createComplex(v.getDataAt(0).getRealPart(),
-         * v.getDataAt(0).getImaginaryPart());
-         * 
-         * int i; na.enable(true); for (i = 0; i < v.getLength(); ++i) { RComplex value =
-         * RDataFactory.createComplex(v.getDataAt(i).getRealPart(),
-         * v.getDataAt(i).getImaginaryPart()); if (na.check(v.getDataAt(i))) { break; } if
-         * (complex_gt(value, max)) max = value; cmax_v[2 * i] = max.getRealPart(); cmax_v[2 * i +
-         * 1] = max.getImaginaryPart(); } if (!na.neverSeenNA()) { Arrays.fill(cmax_v, 2 * i,
-         * cmax_v.length, RRuntime.DOUBLE_NA); } return RDataFactory.createComplexVector(cmax_v,
-         * na.neverSeenNA(), v.getNames());
-         */
+        throw RError.error(getSourceSection(), RError.Message.CUMMAX_UNDEFINED_FOR_COMPLEX);
     }
 
 }
