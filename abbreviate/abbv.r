@@ -1,7 +1,7 @@
+
 function (names.arg, minlength = 4L, use.classes = TRUE, dot = FALSE, 
-          strict = FALSE, method = c("left.kept", "both.sides")) 
-{
-    if (minlength <= 0L) 
+          strict = FALSE, method = c("left.kept", "both.sides")) {
+    if (minlength <= 0L) # if minLength <= 0, return ""
         return(rep.int("", length(names.arg)))
     names.arg <- sub("^ +", "", sub(" +$", "", as.character(names.arg)))
     dups <- duplicated(names.arg)
