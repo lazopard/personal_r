@@ -12,7 +12,7 @@ function (names.arg, minlength = 4L, use.classes = TRUE, dot = FALSE,
     if (any(dups)) #extract unique elements
         names.arg <- names.arg[!dups]
 
-    x <- names.arg #make x = names.arg
+    x <- names.arg
 
     if (strict) { #check minLength strictly
         x[] <- .Internal(abbreviate(x, minlength, use.classes))
@@ -27,7 +27,7 @@ function (names.arg, minlength = 4L, use.classes = TRUE, dot = FALSE,
                                                rev), paste, collapse = "")
 
         dup2 <- rep.int(TRUE, length(names.arg)) #fill logical vector of size length(names.args) with true
-        these <- names.arg #copy names.arg
+        these <- names.arg
 
         repeat {
             ans <- .Internal(abbreviate(these, minlength, use.classes))

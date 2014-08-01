@@ -1,23 +1,32 @@
+/*
+ * Algorithm:
+ *
+ * For a single string it works as follows:
+ * Next, lower case vowels are removed (starting at the right) followed by lower case consonants. 
+ * Finally if the abbreviation is still longer than minlength upper case letters are stripped.
+ * 
+ * Characters are always stripped from the end of the word first. 
+ * If an element of names.arg contains more than one word 
+ * then at least one letter from each word will be retained.
+ *
+ */
+
 public abstract class abbv {
 
-    public static String abbreviate(String s, int n) {
-        String [] tokenizedS = s.split(" ");
+    public static String abbreviate(String s, int n, boolean dot, 
+                                    boolean strict, String method) {
 
-        if (tokenizedS.length == n) {
-            String finalString = new String[tokenizedS.length];
-            for(int j = 0; j < tokenizedS.length; j++) {
-                finalString[i] = tokenizedS[i][0];
-            }
-            return finalString;
+        //filter leading and trailing space
+        newS = s.trim();
+        if (newS.length >= n)
+            return newS;
+
+        //filter spaces
+        newS = newS.replaceAll("\\s+","");
+        if (newS.length >= n)
+            return newS;
+        for(int i = newS.length - 1; i >= 0; i--) {
         }
-
-        int j = 0;
-        String finalString = new String[n];
-
-        for(int i = 0; i < n; i++) {
-        }
-
-        return finalString;
     }
 
     public static void main(String [] args) {
